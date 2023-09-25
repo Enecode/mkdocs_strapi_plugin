@@ -21,7 +21,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: enecode
   username: __token__
-  password: pypi-AgEIcHlwaS5vcmcCJDEyMDAzMTBiLTczM2UtNDIzZS05NzM4LTBmNjM1NTBjYzUzYgACKlszLCI0MWU3MjIxOC1lNTdjLTQzY2MtYjIxYS0yZmIyNjdmYjRiMDMiXQAABiAgJRXuKKRepTX9gL2focJ0pHzFGbOh-sB8gIDP_N_nXg
+  password: 
   distributions: sdist bdist_wheel
   on:
     tags: true
