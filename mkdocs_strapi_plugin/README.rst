@@ -16,7 +16,7 @@ mkdocs_strapi_plugin
 
 
 
-This plugin is designed to fetch data from a remote server (presumably a Strapi API) and inject that data into the generated documentation.
+This plugin is designed to fetch data from a Strapi API and inject that data into the generated mkdoc documentation.
 
 
 * Free software: Apache Software License 2.0

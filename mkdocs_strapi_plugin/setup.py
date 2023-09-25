@@ -28,7 +28,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="This plugin is designed to fetch data from a remote server (presumably a Strapi API) and inject that data into the generated documentation.",
+    description="This plugin is designed to fetch data from Strapi API and inject that data into the mkdocs.",
     entry_points={
         'console_scripts': [
             'mkdocs_strapi_plugin=mkdocs_strapi_plugin.cli:main',
