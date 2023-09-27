@@ -1,68 +1,63 @@
 """Main module."""
 # Import necessary libraries
 import requests
+import mkdocs
 from mkdocs.plugins import BasePlugin
 from mkdocs.config import config_options
 
 # Define the configuration options for your plugin
-class StrapiPlugin(BasePlugin):
+class StrapiPlugin(mkdocs.plugins.BasePlugin):
     config_scheme = (
-        ("strapi_url", config_options.Type(str, required=True, default=None)),
-        # You can add more configuration options here, like authentication tokens, etc.
+        ("strapi_endpoint", mkdocs.config.config_options.Type(str, required=True, default=None)),
+        ("content_type", mkdocs.config.config_options.Type(str, required=True, default=None)),
     )
 
-    # Initialize the plugin
-    def __init__(self):
-        self.strapi = None
+class StrapiPluginConfig(mkdocs.plugins.BasePlugin):
+    strapi_endpoint = mkdocs.config.config_options.Type(str, required=True, default='a default value'),
+    content_type = mkdocs.config.config_options.Type(str, required=True, default='a default value'),
 
-    # Called when the plugin is configured
+class Strapi(mkdocs.plugins.BasePlugin):
+    def __init__(self, config):
+        super().__init__(config)
+        self.strapi_endpoint = config["strapi_endpoint"]
+        self.content_type = config["content_type"]
+
     def on_config(self, config, **kwargs):
-        # Initialize the Strapi object with the provided URL
-        self.strapi = Strapi(self.config["strapi_url"])
-
-    # Called when generating page markdown
-    def on_page_markdown(self, markdown, **kwargs):
-        # Fetch data from the Strapi API
-        data = self.strapi.fetch_data()
-        
-        # for replacing placeholders in the markdown content with the fetched data
-        markdown = markdown.replace("{{ data }}", str(data))
-
-        return markdown
-
-# A class for handling interactions with the Strapi API
-class Strapi:
-    def __init__(self, url):
-        self.url = url
-
-    def fetch_data(self):
-        try:
-            # Send an HTTP GET request to the Strapi API
-            response = requests.get(self.url)
-            response.raise_for_status()  # Raise an exception for HTTP errors
-
-            # Parse the JSON response
-            data = response.json()
-            return data
-        except requests.exceptions.RequestException as e:
-            # Handle any network errors or API request exceptions
-            print(f"Error fetching data from Strapi API: {e}")
-            return {}
-
-    def get_data(self, id):
-        try:
-            response = requests.get(f"{self.url}/{id}")
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching data from Strapi API: {e}")
-            return {}
+        # Get the data from the Strapi API
+        response = requests.get(self.strapi_endpoint + self.content_type)
+        # Convert the response to JSON
+        data = response.json()
+        # Add the data to the config
+        config["strapi"] = data
+        return config
     
-    def create_data(self, data):
-        try:
-            response = requests.post(self.url, json=data)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Error creating data in Strapi API: {e}")
-            return {}
+    def on_page_markdown(self, markdown, page, config, files):
+        # Get the data from the config
+        data = config["strapi"]
+        # Loop through the data
+        for item in data:
+            # Replace the markdown with the data
+            markdown = markdown.replace(item["markdown"], item["content"])
+        return markdown
+    
+    def on_page_content(self, html, page, config, files):
+
+        # Get the data from the config
+        page = page.file.src_path
+        files = files.get_file(page)
+        data = config["strapi"]
+        # Loop through the data
+        for item in data:
+            # Replace the markdown with the data
+            html = html.replace(item["markdown"], item["content"])
+        return html
+    
+    def on_page_context(self, context, page, config, nav):
+        # Get the data from the config
+        page = page.file.src_path
+        nav = nav.pages
+        data = config["strapi"]
+        # Add the data to the context
+        context["strapi"] = data
+        return context
+        
